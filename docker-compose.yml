@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  # -------------------------------------------------------------
+  # 1. AlgoClash Application Database (PostgreSQL 16)
+  # -------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: algoclash-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: algoclash
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - algoclash_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d algoclash"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # -------------------------------------------------------------
+  # 2. Judge0 Sandbox Cluster (Code Execution Engine)
+  # -------------------------------------------------------------
+  judge0-server:
+    image: judge0/judge0:latest
+    container_name: algoclash-judge0-server
+    volumes:
+      - ./judge0/judge0.conf:/etc/judge0.conf:ro
+    ports:
+      - "2358:2358"
+    privileged: true
+    depends_on:
+      judge0-db:
+        condition: service_healthy
+      judge0-redis:
+        condition: service_started
+
+  judge0-worker:
+    image: judge0/judge0:latest
+    container_name: algoclash-judge0-worker
+    command: ["./scripts/worker"]
+    volumes:
+      - ./judge0/judge0.conf:/etc/judge0.conf:ro
+    privileged: true
+    depends_on:
+      judge0-db:
+        condition: service_healthy
+      judge0-redis:
+        condition: service_started
+
+  judge0-db:
+    image: postgres:13-alpine
+    container_name: algoclash-judge0-db
+    environment:
+      POSTGRES_USER: judge0
+      POSTGRES_PASSWORD: judge0_password
+      POSTGRES_DB: judge0
+    volumes:
+      - judge0_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U judge0 -d judge0"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  judge0-redis:
+    image: redis:6-alpine
+    container_name: algoclash-judge0-redis
+
+volumes:
+  algoclash_pgdata:
+  judge0_pgdata:
