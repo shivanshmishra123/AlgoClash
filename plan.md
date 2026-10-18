@@ -11,8 +11,8 @@ This roadmap provides an atomic, step-by-step implementation plan to rebuild the
 | **Phase 0** | Scaffolding, Tooling & Environment Configuration | Completed | 100% |
 | **Phase 1** | Data Layer, Entities & Persistence Repositories | Completed | 100% |
 | **Phase 2** | Security, Identity & JWT Authentication Subsystem | Completed | 100% |
-| **Phase 3** | Algorithmic Problem Management Subsystem | Not Started | 0% |
-| **Phase 4** | Tournament (Series) Engine & Bracket Strategy | Not Started | 0% |
+| **Phase 3** | Algorithmic Problem Management Subsystem | Completed | 100% |
+| **Phase 4** | Tournament (Series) Engine & Bracket Strategy | Completed | 100% |
 | **Phase 5** | 1v1 Match Lifecycle & Access Control Engine | Not Started | 0% |
 | **Phase 6** | Code Execution, Judge0 Client & WebSocket Broker | Not Started | 0% |
 | **Phase 7** | Elo Rating Subsystem & Competitive User Profiles | Not Started | 0% |
@@ -158,18 +158,21 @@ This roadmap provides an atomic, step-by-step implementation plan to rebuild the
 ## Phase 3: Algorithmic Problem Management Subsystem
 
 ### Part 3.1: Problem Logic & APIs
-- [ ] **P3.1.1 Problem DTOs**: Create `CreateProblemRequest` with validation and `ProblemResponse`.
+- [x] **P3.1.1 Problem DTOs**: Create `CreateProblemRequest` with validation and `ProblemResponse`.
   - Depends on: P1.1.2
   - Original reference: `backend/src/main/java/com/codequest/problem/dto/CreateProblemRequest.java`, `ProblemResponse.java`
   - Done when: Request and response serialization conforms to API spec.
-- [ ] **P3.1.2 ProblemService**: Implement problem creation, list all, and get by ID.
+  - Completed: CreateProblemRequest with validation and ProblemResponse DTOs created.
+- [x] **P3.1.2 ProblemService**: Implement problem creation, list all, and get by ID.
   - Depends on: P1.2.2, P3.1.1
   - Original reference: `backend/src/main/java/com/codequest/problem/ProblemService.java`
   - Done when: Created problems are stored and retrievable by ID.
-- [ ] **P3.1.3 ProblemController**: Expose `POST /api/problems` (Admin), `GET /api/problems`, `GET /api/problems/{id}`.
+  - Completed: ProblemService implemented with entity mapping, CRUD operations, and transaction boundaries.
+- [x] **P3.1.3 ProblemController**: Expose `POST /api/problems` (Admin), `GET /api/problems`, `GET /api/problems/{id}`.
   - Depends on: P3.1.2, P2.1.4
   - Original reference: `backend/src/main/java/com/codequest/problem/ProblemController.java`
   - Done when: Non-admin calling `POST /api/problems` receives 403; admin receives 200 with saved problem.
+  - Completed: ProblemController exposed with role-based security configured in SecurityConfig.
 
 > **Phase 3 Checkpoint**: Admin can create coding problems with testcases; public users can list and view problem statements.
 
@@ -178,40 +181,48 @@ This roadmap provides an atomic, step-by-step implementation plan to rebuild the
 ## Phase 4: Tournament (Series) Engine & Bracket Strategy
 
 ### Part 4.1: Bracket Strategy Pattern
-- [ ] **P4.1.1 BracketStrategy Interface & SingleEliminationStrategy**: Implement strategy interface and single elimination strategy (verifying power of 2, random shuffling for round 1, pairwise pairing).
+- [x] **P4.1.1 BracketStrategy Interface & SingleEliminationStrategy**: Implement strategy interface and single elimination strategy (verifying power of 2, random shuffling for round 1, pairwise pairing).
   - Depends on: P1.1.5
   - Original reference: `backend/src/main/java/com/codequest/series/bracket/BracketStrategy.java`, `SingleEliminationBracketStrategy.java`
   - Done when: Shuffled players for size 8 produce 4 round-1 matches.
-- [ ] **P4.1.2 BracketStrategyRegistry**: Implement registry finding appropriate strategy by size.
+  - Completed: BracketStrategy and SingleEliminationBracketStrategy implemented supporting power-of-2 participant validation, random shuffling in round 1, and deterministic pair-up progression.
+- [x] **P4.1.2 BracketStrategyRegistry**: Implement registry finding appropriate strategy by size.
   - Depends on: P4.1.1
   - Original reference: `backend/src/main/java/com/codequest/series/bracket/BracketStrategyRegistry.java`
   - Done when: Requesting strategy for size 8 or 16 returns `SingleEliminationBracketStrategy`.
+  - Completed: BracketStrategyRegistry implemented and wired to resolve bracket strategies dynamically.
 
 ### Part 4.2: Series Lifecycle & Progression
-- [ ] **P4.2.1 Series DTOs & Domain Events**: Create `CreateSeriesRequest`, `SeriesDetailResponse`, `SeriesSummaryResponse`, and `MatchCompletedEvent`.
+- [x] **P4.2.1 Series DTOs & Domain Events**: Create `CreateSeriesRequest`, `SeriesDetailResponse`, `SeriesSummaryResponse`, and `MatchCompletedEvent`.
   - Depends on: P1.1.3
   - Original reference: `backend/src/main/java/com/codequest/series/dto/`, `backend/src/main/java/com/codequest/series/event/MatchCompletedEvent.java`
   - Done when: DTOs serialize correctly.
-- [ ] **P4.2.2 SeriesService Core**: Implement series creation with round problem mappings, paginated summary listing, and series detail retrieval.
+  - Completed: All Series DTOs (CreateSeriesRequest, ParticipantDto, MatchSummaryDto, RoundDto, SeriesDetailResponse, SeriesSummaryResponse) and MatchCompletedEvent record created.
+- [x] **P4.2.2 SeriesService Core**: Implement series creation with round problem mappings, paginated summary listing, and series detail retrieval.
   - Depends on: P1.2.2, P4.1.2, P4.2.1
   - Original reference: `backend/src/main/java/com/codequest/series/SeriesService.java`
   - Done when: Admin creates series and verifies configured per-round problems.
-- [ ] **P4.2.3 Series Joining Logic**: Implement `joinSeries(seriesId, user)` transitioning status to `REGISTRATION_CLOSED` when full.
+  - Completed: SeriesService core implemented with round problem validation and mapping, pagination, and bracket serialization.
+- [x] **P4.2.3 Series Joining Logic**: Implement `joinSeries(seriesId, user)` transitioning status to `REGISTRATION_CLOSED` when full.
   - Depends on: P4.2.2
   - Original reference: `backend/src/main/java/com/codequest/series/SeriesService.java#L125-L155`
   - Done when: Full series transitions to `REGISTRATION_CLOSED`; duplicate join rejected with 400.
-- [ ] **P4.2.4 SeriesProgressionService**: Listen for `MatchCompletedEvent`. When all matches in current round finish, advance winners to next round or mark series `COMPLETED`.
+  - Completed: Series join logic implemented rejecting duplicates (400), non-open series (400), full series (400), and auto-transitioning to REGISTRATION_CLOSED upon capacity.
+- [x] **P4.2.4 SeriesProgressionService**: Listen for `MatchCompletedEvent`. When all matches in current round finish, advance winners to next round or mark series `COMPLETED`.
   - Depends on: P4.1.2, P4.2.1
   - Original reference: `backend/src/main/java/com/codequest/series/SeriesProgressionService.java`
   - Done when: Last match of round 1 completion triggers round 2 match generation.
-- [ ] **P4.2.5 SeriesScheduler**: Implement `@Scheduled` cron jobs to kick off due series (`startDueSeries`) and cancel matches older than 2 hours (`cancelTimedOutMatches`).
+  - Completed: SeriesProgressionService implemented listening for MatchCompletedEvent, advancing winners to next round bracket, and marking series COMPLETED upon final round.
+- [x] **P4.2.5 SeriesScheduler**: Implement `@Scheduled` cron jobs to kick off due series (`startDueSeries`) and cancel matches older than 2 hours (`cancelTimedOutMatches`).
   - Depends on: P4.2.2
   - Original reference: `backend/src/main/java/com/codequest/series/SeriesScheduler.java`
   - Done when: Scheduler activates due series and transitions round 1 matches to `ONGOING`.
-- [ ] **P4.2.6 SeriesController**: Expose `/api/series` endpoints (`POST` create, `GET` paginated list, `GET /{id}` detail, `POST /{id}/join`).
+  - Completed: SeriesScheduler implemented with fixed delay jobs for automatic kickoff of closed due series and cancellation of stale matches.
+- [x] **P4.2.6 SeriesController**: Expose `/api/series` endpoints (`POST` create, `GET` paginated list, `GET /{id}` detail, `POST /{id}/join`).
   - Depends on: P4.2.3, P2.1.4
   - Original reference: `backend/src/main/java/com/codequest/series/SeriesController.java`
   - Done when: REST API allows creating, viewing, and joining series.
+  - Completed: SeriesController exposed with RBAC (@PreAuthorize) and full integration with Spring Data pagination and SecurityContext.
 
 > **Phase 4 Checkpoint**: Tournaments can be created, joined by players, automatically started by scheduler, and advanced when rounds complete.
 
