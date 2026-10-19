@@ -13,9 +13,9 @@ This roadmap provides an atomic, step-by-step implementation plan to rebuild the
 | **Phase 2** | Security, Identity & JWT Authentication Subsystem | Completed | 100% |
 | **Phase 3** | Algorithmic Problem Management Subsystem | Completed | 100% |
 | **Phase 4** | Tournament (Series) Engine & Bracket Strategy | Completed | 100% |
-| **Phase 5** | 1v1 Match Lifecycle & Access Control Engine | Not Started | 0% |
-| **Phase 6** | Code Execution, Judge0 Client & WebSocket Broker | Not Started | 0% |
-| **Phase 7** | Elo Rating Subsystem & Competitive User Profiles | Not Started | 0% |
+| **Phase 5** | 1v1 Match Lifecycle & Access Control Engine | Completed | 100% |
+| **Phase 6** | Code Execution, Judge0 Client & WebSocket Broker | Completed | 100% |
+| **Phase 7** | Elo Rating Subsystem & Competitive User Profiles | Completed | 100% |
 | **Phase 8** | Frontend Scaffolding, Authentication & Shared UI | Not Started | 0% |
 | **Phase 9** | Frontend Pages (Lobby, Bracket, Arena, Admin) | Not Started | 0% |
 | **Phase 10** | End-to-End Verification, Performance & Polish | Not Started | 0% |
@@ -231,22 +231,26 @@ This roadmap provides an atomic, step-by-step implementation plan to rebuild the
 ## Phase 5: 1v1 Match Lifecycle & Access Control Engine
 
 ### Part 5.1: Match Service & Controller
-- [ ] **P5.1.1 MatchResponse DTO**: Create `MatchResponse` containing problem details, opponent metadata, match state, and user's latest submission.
+- [x] **P5.1.1 MatchResponse DTO**: Create `MatchResponse` containing problem details, opponent metadata, match state, and user's latest submission.
   - Depends on: P1.1.5
   - Original reference: `backend/src/main/java/com/codequest/match/dto/MatchResponse.java`
   - Done when: Response structure maps all required fields.
-- [ ] **P5.1.2 MatchService Access Guard**: Implement `getAccessibleMatchById(matchId, userId)` ensuring user is player1 or player2 and state is `ONGOING` or `COMPLETED`.
+  - Completed: MatchResponse DTO implemented containing match status, opponent details, problem payload, and latest submission fields.
+- [x] **P5.1.2 MatchService Access Guard**: Implement `getAccessibleMatchById(matchId, userId)` ensuring user is player1 or player2 and state is `ONGOING` or `COMPLETED`.
   - Depends on: P1.2.3, P5.1.1
   - Original reference: `backend/src/main/java/com/codequest/match/MatchService.java`
   - Done when: Non-participant gets 403; pending match gets 400; participant of ongoing match gets match entity.
-- [ ] **P5.1.3 MatchController**: Expose `GET /api/matches/{id}`.
+  - Completed: MatchService implemented with strict participant identity verification, match state enforcement (400 on PENDING), and latest submission mapping.
+- [x] **P5.1.3 MatchController**: Expose `GET /api/matches/{id}`.
   - Depends on: P5.1.2
   - Original reference: `backend/src/main/java/com/codequest/match/MatchController.java`
   - Done when: Competitor can fetch active match arena state.
-- [ ] **P5.1.4 DevSeedController**: Expose utility `POST /api/dev/seed-match` for testing matches.
+  - Completed: MatchController exposed with @GetMapping("/{id}"), requiring authentication and delegating to MatchService with SecurityUtils principal.
+- [x] **P5.1.4 DevSeedController**: Expose utility `POST /api/dev/seed-match` for testing matches.
   - Depends on: P5.1.3
   - Original reference: `backend/src/main/java/com/codequest/common/DevSeedController.java`
   - Done when: Endpoint seeds 2 users, demo problem, demo series, and match #1.
+  - Completed: DevSeedController implemented providing POST /api/dev/seed-match which provisions test duelists, demo problem, tournament series, and active match.
 
 > **Phase 5 Checkpoint**: Matches are securely guarded by participant identity and state; match arena data is accessible to duelists.
 
@@ -255,26 +259,31 @@ This roadmap provides an atomic, step-by-step implementation plan to rebuild the
 ## Phase 6: Code Execution, Judge0 Integration & WebSocket Push
 
 ### Part 6.1: Judge0 Client & Resilience
-- [ ] **P6.1.1 WebSocketConfig**: Configure STOMP endpoint at `/ws-algoclash` with SockJS and simple broker on `/topic`.
+- [x] **P6.1.1 WebSocketConfig**: Configure STOMP endpoint at `/ws-algoclash` with SockJS and simple broker on `/topic`.
   - Depends on: P0.1.3
   - Original reference: `backend/src/main/java/com/codequest/config/WebSocketConfig.java`
   - Done when: WebSocket client connects to `http://localhost:8080/ws-algoclash`.
-- [ ] **P6.1.2 Judge0Client with Resilience4j**: Implement HTTP client calling Judge0 `POST /submissions?wait=true` with `@Retry` and `@CircuitBreaker`.
+  - Completed: WebSocketConfig configured registering /ws-algoclash with SockJS, /topic broker, and allowed origin patterns; SecurityConfig updated to permit WebSocket handshakes.
+- [x] **P6.1.2 Judge0Client with Resilience4j**: Implement HTTP client calling Judge0 `POST /submissions?wait=true` with `@Retry` and `@CircuitBreaker`.
   - Depends on: P0.1.3
   - Original reference: `backend/src/main/java/com/codequest/submission/judge/Judge0Client.java`
   - Done when: Submitting code to Judge0 returns execution status and output; circuit breaker falls back on timeout.
-- [ ] **P6.1.3 MatchFinalizationService**: Implement pessimistic lock `finalize(matchId, winnerId)` under `Propagation.REQUIRES_NEW`, setting winner and publishing `MatchCompletedEvent`.
+  - Completed: Judge0Client implemented with RestTemplate, Resilience4j @Retry (3 attempts) and @CircuitBreaker (sliding window 5, 80% threshold) with fallback, mapping Java (91) and C++ (54).
+- [x] **P6.1.3 MatchFinalizationService**: Implement pessimistic lock `finalize(matchId, winnerId)` under `Propagation.REQUIRES_NEW`, setting winner and publishing `MatchCompletedEvent`.
   - Depends on: P1.2.3, P4.2.1
   - Original reference: `backend/src/main/java/com/codequest/submission/MatchFinalizationService.java`
   - Done when: Match state transitions to `COMPLETED` and event fires; concurrent calls do not overwrite winner.
-- [ ] **P6.1.4 SubmissionPollingService**: Implement `@Async` submission judging against test cases, verdict settling, and WebSocket broadcast to `/topic/match/{matchId}`.
+  - Completed: MatchFinalizationService implemented with Propagation.REQUIRES_NEW, pessimistic write row locking (findByIdForUpdate), state check prevention against dual winners, and MatchCompletedEvent publishing.
+- [x] **P6.1.4 SubmissionPollingService**: Implement `@Async` submission judging against test cases, verdict settling, and WebSocket broadcast to `/topic/match/{matchId}`.
   - Depends on: P6.1.1, P6.1.2, P6.1.3
   - Original reference: `backend/src/main/java/com/codequest/submission/judge/SubmissionPollingService.java`
   - Done when: Submission verdicts broadcast over WebSocket destination `/topic/match/{id}`.
-- [ ] **P6.1.5 SubmissionService & SubmissionController**: Expose `POST /api/matches/{matchId}/submissions`. Validate participation, persist `PENDING` submission, and trigger async polling.
+  - Completed: SubmissionPollingService implemented with @Async test case evaluation against Judge0, match finalization on ACCEPTED, and real-time STOMP push to /topic/match/{matchId}.
+- [x] **P6.1.5 SubmissionService & SubmissionController**: Expose `POST /api/matches/{matchId}/submissions`. Validate participation, persist `PENDING` submission, and trigger async polling.
   - Depends on: P6.1.4
   - Original reference: `backend/src/main/java/com/codequest/submission/SubmissionService.java`, `SubmissionController.java`
   - Done when: Submitting code returns 200 with `PENDING` verdict, followed by async judging.
+  - Completed: SubmissionService and SubmissionController exposed with @PostMapping("/{matchId}/submissions"), participant validation, match state enforcement (400 on COMPLETED/PENDING), PENDING persistence, and asynchronous judging kickoff.
 
 > **Phase 6 Checkpoint**: User code executes against Judge0 sandbox; final verdict triggers pessimistic match settlement and streams updates over STOMP WebSocket.
 
@@ -283,14 +292,16 @@ This roadmap provides an atomic, step-by-step implementation plan to rebuild the
 ## Phase 7: Rating Subsystem & Competitive User Profiles
 
 ### Part 7.1: Ratings & Profiles
-- [ ] **P7.1.1 SeriesResultService**: Implement `@EventListener` for `MatchCompletedEvent` updating winner rating (+10, +1 win) and loser rating (-5 floored at 0, +1 loss).
+- [x] **P7.1.1 SeriesResultService**: Implement `@EventListener` for `MatchCompletedEvent` updating winner rating (+10, +1 win) and loser rating (-5 floored at 0, +1 loss).
   - Depends on: P4.2.1, P1.2.1
   - Original reference: `backend/src/main/java/com/codequest/series/SeriesResultService.java`
   - Done when: Ratings update accurately after match finalization.
-- [ ] **P7.1.2 UserService & UserController**: Implement `GET /api/users/username/{username}/profile` returning stats and 10 recent matches.
+  - Completed: SeriesResultService implemented listening to MatchCompletedEvent, awarding winner (+10, +1 win) and penalizing loser (-5 floored at 0, +1 loss).
+- [x] **P7.1.2 UserService & UserController**: Implement `GET /api/users/username/{username}/profile` returning stats and 10 recent matches.
   - Depends on: P1.2.1, P1.2.3
   - Original reference: `backend/src/main/java/com/codequest/user/UserService.java`, `UserController.java`
   - Done when: Profile endpoint returns user stats, win rate, and recent match list.
+  - Completed: UserService and UserController implemented exposing GET /api/users/username/{username}/profile with rating, win rate calculation, and last 10 matches history.
 
 > **Phase 7 Checkpoint**: Completed matches automatically adjust player ratings and record match history in user profiles.
 
