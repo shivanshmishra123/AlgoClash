@@ -35,6 +35,9 @@ class MatchServiceTest {
     @Mock
     private SubmissionRepository submissionRepository;
 
+    @Mock
+    private com.algoclash.user.UserRepository userRepository;
+
     @InjectMocks
     private MatchService matchService;
 

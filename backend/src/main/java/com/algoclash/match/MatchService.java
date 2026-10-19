@@ -19,20 +19,24 @@ public class MatchService {
 
     private final MatchRepository matchRepository;
     private final SubmissionRepository submissionRepository;
+    private final com.algoclash.user.UserRepository userRepository;
 
     @Transactional(readOnly = true)
     public Match getAccessibleMatchById(Long matchId, Long userId) {
         Match match = matchRepository.findById(matchId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Match not found with id: " + matchId));
 
+        com.algoclash.user.User user = userRepository.findById(userId).orElse(null);
+        boolean isAdmin = user != null && user.getRole() == com.algoclash.user.UserRole.ADMIN;
+
         boolean isPlayer1 = match.getPlayer1() != null && match.getPlayer1().getId().equals(userId);
         boolean isPlayer2 = match.getPlayer2() != null && match.getPlayer2().getId().equals(userId);
 
-        if (!isPlayer1 && !isPlayer2) {
+        if (!isAdmin && !isPlayer1 && !isPlayer2) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied: you are not a participant in this match");
         }
 
-        if (match.getState() == MatchState.PENDING) {
+        if (!isAdmin && match.getState() == MatchState.PENDING) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Match is not yet ongoing");
         }
 
@@ -56,6 +60,15 @@ public class MatchService {
             }
         } else if (match.getPlayer2() != null && match.getPlayer2().getId().equals(userId)) {
             if (match.getPlayer1() != null) {
+                opponentId = match.getPlayer1().getId();
+                opponentUsername = match.getPlayer1().getUsername();
+            }
+        } else {
+            // Admin spectator view
+            if (match.getPlayer2() != null) {
+                opponentId = match.getPlayer2().getId();
+                opponentUsername = match.getPlayer2().getUsername();
+            } else if (match.getPlayer1() != null) {
                 opponentId = match.getPlayer1().getId();
                 opponentUsername = match.getPlayer1().getUsername();
             }

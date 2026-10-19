@@ -1,20 +1,61 @@
-export default function App() {
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './auth/AuthContext';
+import { Layout } from './components/Layout';
+import { ProtectedRoute } from './routes/ProtectedRoute';
+import { AdminRoute } from './routes/AdminRoute';
+
+// Pages
+import LandingPage from './pages/LandingPage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import DashboardPage from './pages/DashboardPage';
+import SeriesListPage from './pages/SeriesListPage';
+import SeriesDetailPage from './pages/SeriesDetailPage';
+import MatchPage from './pages/MatchPage';
+import ProfilePage from './pages/ProfilePage';
+import ProblemsListPage from './pages/ProblemsListPage';
+import ProblemDetailPage from './pages/ProblemDetailPage';
+import AdminProblemsPage from './pages/AdminProblemsPage';
+import AdminCreateSeriesPage from './pages/AdminCreateSeriesPage';
+
+export const App: React.FC = () => {
   return (
-    <div className="min-h-screen bg-black text-cyan-400 flex flex-col items-center justify-center p-8 font-mono">
-      <h1 className="text-4xl font-bold tracking-widest text-[#00ffcc] mb-4 drop-shadow-[0_0_15px_rgba(0,255,204,0.6)]">
-        ALGOCLASH
-      </h1>
-      <p className="text-slate-400 text-lg mb-8">
-        Real-Time 1v1 Algorithmic Combat &amp; Tournament Arena
-      </p>
-      <div className="border border-cyan-500/30 bg-slate-900/40 rounded-lg p-6 max-w-md w-full text-center">
-        <span className="inline-block px-3 py-1 text-xs rounded-full bg-cyan-950 text-cyan-300 border border-cyan-800 mb-3">
-          SYSTEM ONLINE
-        </span>
-        <p className="text-sm text-slate-300">
-          Scaffolding initialized. Ready for match orchestration.
-        </p>
-      </div>
-    </div>
+    <BrowserRouter>
+      <AuthProvider>
+        <Routes>
+          <Route element={<Layout />}>
+            {/* Public Routes */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/series" element={<SeriesListPage />} />
+            <Route path="/series/:id" element={<SeriesDetailPage />} />
+            <Route path="/problems" element={<ProblemsListPage />} />
+            <Route path="/problems/:id" element={<ProblemDetailPage />} />
+
+            {/* Protected Operative Routes */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/match/:id" element={<MatchPage />} />
+              <Route path="/profile/:username" element={<ProfilePage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+            </Route>
+
+            {/* Protected Admin Routes */}
+            <Route element={<AdminRoute />}>
+              <Route path="/admin/problems" element={<AdminProblemsPage />} />
+              <Route path="/admin/create-series" element={<AdminCreateSeriesPage />} />
+              <Route path="/admin/series/create" element={<AdminCreateSeriesPage />} />
+            </Route>
+
+            {/* Fallback */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Route>
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
   );
-}
+};
+
+export default App;

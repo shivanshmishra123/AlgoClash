@@ -17,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SeriesScheduler {
 
-    private static final long MATCH_TIMEOUT_HOURS = 2;
+    private static final long MATCH_TIMEOUT_HOURS = 24;
 
     private final SeriesRepository seriesRepository;
     private final MatchRepository matchRepository;

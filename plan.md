@@ -16,9 +16,9 @@ This roadmap provides an atomic, step-by-step implementation plan to rebuild the
 | **Phase 5** | 1v1 Match Lifecycle & Access Control Engine | Completed | 100% |
 | **Phase 6** | Code Execution, Judge0 Client & WebSocket Broker | Completed | 100% |
 | **Phase 7** | Elo Rating Subsystem & Competitive User Profiles | Completed | 100% |
-| **Phase 8** | Frontend Scaffolding, Authentication & Shared UI | Not Started | 0% |
-| **Phase 9** | Frontend Pages (Lobby, Bracket, Arena, Admin) | Not Started | 0% |
-| **Phase 10** | End-to-End Verification, Performance & Polish | Not Started | 0% |
+| **Phase 8** | Frontend Scaffolding, Authentication & Shared UI | Completed | 100% |
+| **Phase 9** | Frontend Pages (Lobby, Bracket, Arena, Admin) | Completed | 100% |
+| **Phase 10** | End-to-End Verification, Performance & Polish | Completed | 100% |
 
 ---
 
@@ -310,22 +310,26 @@ This roadmap provides an atomic, step-by-step implementation plan to rebuild the
 ## Phase 8: Frontend Core, Routing, Auth & Shared UI Components
 
 ### Part 8.1: API Clients, Context & Components
-- [ ] **P8.1.1 Axios Client & Interceptors**: Configure Axios instance with `VITE_API_BASE_URL`, token injection interceptor, and 401 redirect to `/login`.
+- [x] **P8.1.1 Axios Client & Interceptors**: Configure Axios instance with `VITE_API_BASE_URL`, token injection interceptor, and 401 redirect to `/login`.
   - Depends on: P0.1.4
   - Original reference: `frontend/src/api/client.ts`
   - Done when: Authenticated API calls send Bearer token automatically.
-- [ ] **P8.1.2 Typed API Modules**: Implement `matches.ts`, `problems.ts`, `series.ts`, and `users.ts`.
+  - Completed: Axios client created with Bearer token injection from localStorage('ac_token') and automatic 401 redirect to /login.
+- [x] **P8.1.2 Typed API Modules**: Implement `matches.ts`, `problems.ts`, `series.ts`, and `users.ts`.
   - Depends on: P8.1.1
   - Original reference: `frontend/src/api/`
   - Done when: API methods return typed response data.
-- [ ] **P8.1.3 AuthContext & Route Guards**: Implement `AuthContext` decoding JWT role (`ADMIN`/`USER`), and route guards (`ProtectedRoute`, `AdminRoute`).
+  - Completed: Fully typed API modules (types.ts, problems.ts, series.ts, matches.ts, users.ts, auth.ts) implemented mirroring backend endpoints and DTOs.
+- [x] **P8.1.3 AuthContext & Route Guards**: Implement `AuthContext` decoding JWT role (`ADMIN`/`USER`), and route guards (`ProtectedRoute`, `AdminRoute`).
   - Depends on: P8.1.2
   - Original reference: `frontend/src/auth/AuthContext.tsx`, `frontend/src/routes/`
   - Done when: Unauthenticated users are redirected from protected routes; non-admins blocked from `/admin/*`.
-- [ ] **P8.1.4 Shared UI Components & Layout**: Implement `Layout.tsx` (top HUD navigation, scan lines, user info, logout), `DifficultyBadge.tsx`, and `SeriesCountdown.tsx`.
+  - Completed: AuthContext implemented with JWT decoding (username, role, expiration), reactive localStorage sync, and ProtectedRoute/AdminRoute guards.
+- [x] **P8.1.4 Shared UI Components & Layout**: Implement `Layout.tsx` (top HUD navigation, scan lines, user info, logout), `DifficultyBadge.tsx`, and `SeriesCountdown.tsx`.
   - Depends on: P8.1.3
   - Original reference: `frontend/src/components/`
   - Done when: Navigation bar renders correctly and responds to authentication state.
+  - Completed: Layout with top HUD nav, user role chip, telemetry footer, DifficultyBadge, and ticking SeriesCountdown implemented with cyberpunk void aesthetics.
 
 > **Phase 8 Checkpoint**: Frontend shell renders with dark terminal layout; authentication state preserves across reloads; route guards protect private pages.
 
@@ -334,40 +338,48 @@ This roadmap provides an atomic, step-by-step implementation plan to rebuild the
 ## Phase 9: Frontend Pages (Lobby, Bracket, Arena, Admin)
 
 ### Part 9.1: Public & User Pages
-- [ ] **P9.1.1 Landing, Login & Register Pages**: Implement `LandingPage.tsx`, `LoginPage.tsx`, and `RegisterPage.tsx`.
+- [x] **P9.1.1 Landing, Login & Register Pages**: Implement `LandingPage.tsx`, `LoginPage.tsx`, and `RegisterPage.tsx`.
   - Depends on: P8.1.4
   - Original reference: `frontend/src/pages/LandingPage.tsx`, `LoginPage.tsx`, `RegisterPage.tsx`
   - Done when: Users can register new accounts and log in to obtain JWT.
-- [ ] **P9.1.2 DashboardPage**: Implement dashboard with mission control HUD, join series CTA, quick problem list, and recent matches table.
+  - Completed: LandingPage with cyberpunk hero tiles, LoginPage, and RegisterPage implemented with JWT auth processing.
+- [x] **P9.1.2 DashboardPage**: Implement dashboard with mission control HUD, join series CTA, quick problem list, and recent matches table.
   - Depends on: P8.1.4
   - Original reference: `frontend/src/pages/DashboardPage.tsx`
   - Done when: Authenticated user dashboard renders stats and quick links.
-- [ ] **P9.1.3 SeriesListPage**: Implement paginated tournament list with slot fill bars, status pills, and countdown clocks.
+  - Completed: DashboardPage implemented with live operative metrics, active tournament previews, instant 1v1 duel launcher, and combat history table.
+- [x] **P9.1.3 SeriesListPage**: Implement paginated tournament list with slot fill bars, status pills, and countdown clocks.
   - Depends on: P8.1.4
   - Original reference: `frontend/src/pages/SeriesListPage.tsx`
   - Done when: Tournament series list displays active and upcoming tournaments.
-- [ ] **P9.1.4 SeriesDetailPage & Bracket Visualizer**: Implement series detail page showing participant roster, countdown, and round-by-round match brackets.
+  - Completed: SeriesListPage implemented with search filter, status pills, interactive slot capacity gauges, live countdown clocks, and instant join modal/action.
+- [x] **P9.1.4 SeriesDetailPage & Bracket Visualizer**: Implement series detail page showing participant roster, countdown, and round-by-round match brackets.
   - Depends on: P8.1.4
   - Original reference: `frontend/src/pages/SeriesDetailPage.tsx`
   - Done when: Bracket shows matchups and allows eligible users to join.
-- [ ] **P9.1.5 ProfilePage**: Implement operative profile displaying Elo rating, wins, losses, win rate progress bar, and 10 recent matches.
+  - Completed: SeriesDetailPage implemented with single-elimination bracket matrix visualizer, dynamic round progression, victor badges, live matchmaking links, and real-time operative roster.
+- [x] **P9.1.5 ProfilePage**: Implement operative profile displaying Elo rating, wins, losses, win rate progress bar, and 10 recent matches.
   - Depends on: P8.1.4
   - Original reference: `frontend/src/pages/ProfilePage.tsx`
   - Done when: Visiting `/profile/:username` renders user stats.
+  - Completed: ProfilePage implemented with operative dossier header, Elo rank tier breakdown, victories/losses telemetry, win-rate progress bar, and 10-match combat log table.
 
 ### Part 9.2: Match Arena & Admin Pages
-- [ ] **P9.2.1 MatchPage Live Arena**: Implement Monaco Editor integration with Java/C++ templates, problem drawer, submit button, and STOMP WebSocket subscriber for `/topic/match/{id}`.
+- [x] **P9.2.1 MatchPage Live Arena**: Implement Monaco Editor integration with Java/C++ templates, problem drawer, submit button, and STOMP WebSocket subscriber for `/topic/match/{id}`.
   - Depends on: P8.1.4
   - Original reference: `frontend/src/pages/MatchPage.tsx`
   - Done when: Code editor accepts input, submits to API, receives STOMP verdict, and updates HUD live.
-- [ ] **P9.2.2 AdminProblemsPage & ProblemDetailPage**: Implement admin problem authoring form with testcase JSON editor and public problem viewer.
+  - Completed: MatchPage implemented with Monaco editor (@monaco-editor/react vs-dark), Java/C++ templates, collapsible problem spec drawer, real-time STOMP WebSocket subscriber for /topic/match/{id}, live verdict stream, and winner announcement modal.
+- [x] **P9.2.2 AdminProblemsPage & ProblemDetailPage**: Implement admin problem authoring form with testcase JSON editor and public problem viewer.
   - Depends on: P8.1.4
   - Original reference: `frontend/src/pages/AdminProblemsPage.tsx`, `ProblemDetailPage.tsx`
   - Done when: Admin creates problem; statement renders at `/problems/:id`.
-- [ ] **P9.2.3 AdminCreateSeriesPage**: Implement admin tournament creation form with per-round problem selection.
+  - Completed: AdminProblemsPage implemented with problem composer modal, difficulty/limits selector, and testcase JSON validator; ProblemDetailPage implemented with formatted statement viewer, time/memory constraints, and copyable sample vectors.
+- [x] **P9.2.3 AdminCreateSeriesPage**: Implement admin tournament creation form with per-round problem selection.
   - Depends on: P8.1.4
   - Original reference: `frontend/src/pages/AdminCreateSeriesPage.tsx`
   - Done when: Admin can configure and launch a new 8 or 16 player series.
+  - Completed: AdminCreateSeriesPage implemented with 8/16 player power-of-2 selector, UTC kickoff datetime scheduler, per-round problem dropdown mapper, and dynamic route wiring in App.tsx.
 
 > **Phase 9 Checkpoint**: Full web application accessible in browser; competitors can participate in 1v1 duels inside Monaco editor and view live tournament brackets.
 
@@ -376,17 +388,21 @@ This roadmap provides an atomic, step-by-step implementation plan to rebuild the
 ## Phase 10: End-to-End Verification, Performance & Polish
 
 ### Part 10.1: Verification & Testing
-- [ ] **P10.1.1 Full 1v1 Duel Lifecycle Test**: Register two users, seed/start a match, submit Java code from Player 1, verify `ACCEPTED` verdict, confirm Player 1 win, and check Elo rating change (+10/-5).
+- [x] **P10.1.1 Full 1v1 Duel Lifecycle Test**: Register two users, seed/start a match, submit Java code from Player 1, verify `ACCEPTED` verdict, confirm Player 1 win, and check Elo rating change (+10/-5).
   - Depends on: Phase 9
   - Original reference: Full stack
   - Done when: End-to-end match flow finishes with live winner announcement and updated ratings.
-- [ ] **P10.1.2 8-Player Single Elimination Simulation**: Simulate 8-player series registration, scheduler kickoff, 4 quarterfinal matches, 2 semifinal matches, and 1 final match.
+  - Completed: Verified with `DuelLifecycleIntegrationTest` and `POST /api/dev/simulate-duel`. Two users registered at 1000 Elo, match created and submitted with Java solution, verdict settled to ACCEPTED, winner announced via WebSocket broadcast, and ratings updated to 1010 (+10) and 995 (-5).
+- [x] **P10.1.2 8-Player Single Elimination Simulation**: Simulate 8-player series registration, scheduler kickoff, 4 quarterfinal matches, 2 semifinal matches, and 1 final match.
   - Depends on: P10.1.1
   - Original reference: Full stack
   - Done when: Series status transitions from `REGISTRATION_OPEN` to `COMPLETED` and champion is declared.
-- [ ] **P10.1.3 One-Click Scripts & Documentation**: Provide `start-all.bat`, `start-infra.bat`, `start-backend.bat`, `start-frontend.bat`, and `stop-all.bat`.
+  - Completed: Verified with `EightPlayerSeriesSimulationIntegrationTest` and `POST /api/dev/simulate-8player-series`. Tournament transitions through REGISTRATION_OPEN -> REGISTRATION_CLOSED -> 4 Quarterfinals -> 2 Semifinals -> 1 Grand Final -> COMPLETED with champion crowned (+30 Elo).
+- [x] **P10.1.3 One-Click Scripts & Documentation**: Provide `start-all.bat`, `start-infra.bat`, `start-backend.bat`, `start-frontend.bat`, and `stop-all.bat`.
   - Depends on: Phase 0 through Phase 9
   - Original reference: Root scripts
   - Done when: Running `start-all.bat` launches database, backend, and frontend without manual intervention.
+  - Completed: Created all 5 production batch scripts (`start-all.bat`, `start-infra.bat`, `start-backend.bat`, `start-frontend.bat`, `stop-all.bat`) and root `README.md` documentation. Running `start-all.bat` boots PostgreSQL container, launches Spring Boot on :8080, launches Vite React on :5173, and opens the application in the default browser.
 
 > **Phase 10 Checkpoint**: Full application runs out of the box with zero errors, passing all acceptance criteria.
+
