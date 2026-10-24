@@ -9,6 +9,9 @@ target/
 *.jar
 *.war
 
+# Docker
+docker-compose.override.yml
+
 # IDE
 .idea/
 .vscode/
