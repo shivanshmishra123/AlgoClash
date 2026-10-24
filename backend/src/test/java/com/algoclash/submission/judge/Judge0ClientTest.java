@@ -75,7 +75,7 @@ class Judge0ClientTest {
                 eq("http://localhost:2358/submissions?wait=true"),
                 org.mockito.ArgumentMatchers.<HttpEntity<Judge0Request>>argThat(entity ->
                         "mock-secret-key".equals(entity.getHeaders().getFirst("X-Auth-Token")) &&
-                        "Bearer mock-secret-key".equals(entity.getHeaders().getFirst("Authorization")) &&
+                        "mock-secret-key".equals(entity.getHeaders().getFirst("Authorization")) &&
                         "mock-secret-key".equals(entity.getHeaders().getFirst("X-RapidAPI-Key"))
                 ),
                 eq(Judge0Response.class)

@@ -46,8 +46,8 @@ public class Judge0Client {
         if (judge0ApiKey != null && !judge0ApiKey.trim().isEmpty()) {
             String token = judge0ApiKey.trim();
             headers.set("X-Auth-Token", token);
-            headers.set("Authorization", "Bearer " + token);
             headers.set("X-RapidAPI-Key", token);
+            headers.set("Authorization", token);
         }
 
         HttpEntity<Judge0Request> entity = new HttpEntity<>(request, headers);
