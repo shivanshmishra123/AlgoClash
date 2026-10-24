@@ -58,6 +58,36 @@ class Judge0ClientTest {
     }
 
     @Test
+    void shouldIncludeAuthHeadersWhenApiKeyConfigured() {
+        ReflectionTestUtils.setField(judge0Client, "judge0ApiKey", "mock-secret-key");
+
+        Judge0Request request = Judge0Request.builder()
+                .sourceCode("public class Main {}")
+                .languageId(91)
+                .build();
+
+        Judge0Response expectedResponse = Judge0Response.builder()
+                .token("auth-token")
+                .status(new Judge0Response.Judge0Status(3, "Accepted"))
+                .build();
+
+        when(restTemplate.postForEntity(
+                eq("http://localhost:2358/submissions?wait=true"),
+                org.mockito.ArgumentMatchers.<HttpEntity<Judge0Request>>argThat(entity ->
+                        "mock-secret-key".equals(entity.getHeaders().getFirst("X-Auth-Token")) &&
+                        "Bearer mock-secret-key".equals(entity.getHeaders().getFirst("Authorization")) &&
+                        "mock-secret-key".equals(entity.getHeaders().getFirst("X-RapidAPI-Key"))
+                ),
+                eq(Judge0Response.class)
+        )).thenReturn(ResponseEntity.ok(expectedResponse));
+
+        Judge0Response actual = judge0Client.submitAndWait(request);
+
+        assertThat(actual).isNotNull();
+        assertThat(actual.getToken()).isEqualTo("auth-token");
+    }
+
+    @Test
     void shouldReturnNullWhenFallbackTriggered() {
         Judge0Request request = Judge0Request.builder()
                 .sourceCode("int main() {}")

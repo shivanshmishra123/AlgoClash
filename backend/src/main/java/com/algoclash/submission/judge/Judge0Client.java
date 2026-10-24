@@ -33,12 +33,22 @@ public class Judge0Client {
     @Value("${judge0.url:http://localhost:2358}")
     private String judge0Url;
 
+    @Value("${judge0.api-key:}")
+    private String judge0ApiKey;
+
     @Retry(name = "judge0")
     @CircuitBreaker(name = "judge0", fallbackMethod = "fallbackSubmit")
     public Judge0Response submitAndWait(Judge0Request request) {
         String url = judge0Url + "/submissions?wait=true";
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+
+        if (judge0ApiKey != null && !judge0ApiKey.trim().isEmpty()) {
+            String token = judge0ApiKey.trim();
+            headers.set("X-Auth-Token", token);
+            headers.set("Authorization", "Bearer " + token);
+            headers.set("X-RapidAPI-Key", token);
+        }
 
         HttpEntity<Judge0Request> entity = new HttpEntity<>(request, headers);
         ResponseEntity<Judge0Response> response = restTemplate.postForEntity(url, entity, Judge0Response.class);

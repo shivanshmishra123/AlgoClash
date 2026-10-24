@@ -25,4 +25,6 @@ services:
       - key: APP_CORS_ALLOWED_ORIGIN
         sync: false          # set to your Vercel frontend URL
       - key: JUDGE0_URL
-        sync: false          # set to your hosted Judge0 instance
+        value: https://api.onlinecompiler.io/api/judge0
+      - key: JUDGE0_API_KEY
+        sync: false          # set your free OnlineCompiler.io API key in Render dashboard
